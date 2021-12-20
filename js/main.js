@@ -1,78 +1,87 @@
-console.log('coś tam');
+console.log('JS działa');
 
 let endOfPage = 0;
+let preloading = false;
+
 
 const showPreloader = () => {
-
+    let preloader = document.getElementById('preloader');
+    console.log(`showPreloader()`);
+    preloader.style.display = 'block';
+    preloading = true;
 }
+
 
 const hidePreloader = () => {
     let preloader = document.getElementById('preloader');
-    console.log('Show preloader');
+    console.log(`hidereloader()`);
+    preloader.style.display = 'none';
+    preloading = false;
 }
 
+
 const getData = () => {
-    console.log('getData()');
 
-    fetch('https://akademia108.pl/api/ajax/get-users.php')
-        .then(response => response.json())
-        .then(data => {
+    if (!preloading) {
 
-            let body = document.body;
-            let hr = document.createElement('hr');
-            body.appendChild(hr);
+        showPreloader();
 
-        
-            console.log(data);
-            for (let user of data) {
-                let pId = document.createElement('p');
-                let pUserName = document.createElement('p');
-                let pUserUrl = document.createElement('p');
+        fetch('https://akademia108.pl/api/ajax/get-users.php')
+            .then(response => response.json())
+            .then(data => {
 
-                pId.innerText = `User ID: ${user.id}`;
-                pUserName.innerText = `User Name: ${user.name}`;
-                pUserUrl.innerHTML = `User URL: ${user.website}<br>--------`;
+                console.log(data);
 
-                body.appendChild(pId);
-                body.appendChild(pUserName);
-                body.appendChild(pUserUrl);
+                let body = document.body;
+                let hr = document.createElement('hr');
+                body.appendChild(hr);
 
-            }
+                for (let user of data) {
 
-        })
-        .catch(error => console.error('błąd: ', error));
+                    let pId = document.createElement('p');
+                    let pUserName = document.createElement('p');
+                    let pUserUrl = document.createElement('p');
 
+                    pId.innerText = `User ID: ${user.id}`;
+                    pUserName.innerText = `User Name: ${user.name}`;
+                    pUserUrl.innerHTML = `User URL: ${user.website}<br>--------`;
+
+                    body.appendChild(pId);
+                    body.appendChild(pUserName);
+                    body.appendChild(pUserUrl);
+
+                    hidePreloader()
+                }
+
+            })
+            .catch(error => console.error('błąd: ', error));
+    }
 }
 
 
 const scrollToEndOfPage = () => {
 
     let d = document.documentElement;
-
     let scrollHeight = d.scrollHeight;
-    console.log(`Scroll Height: ${scrollHeight}`)
-
     let scrollTop = d.scrollTop;
-    console.log(`Scroll Top: ${scrollTop}`)
-
     let clientHeight = d.clientHeight;
-    console.log(`Client Height: ${clientHeight}`)
-
     let sumaScrollTopPlusClientHeight = Math.ceil(scrollTop + clientHeight);
-    console.log(`Suma: ${sumaScrollTopPlusClientHeight}`)
-    console.log('=============')
 
-
+    console.log(`Scroll Height: ${scrollHeight}`);
+    console.log(`Scroll Top: ${scrollTop}`);
+    console.log(`Client Height: ${clientHeight}`);
+    console.log(`Suma: ${sumaScrollTopPlusClientHeight}`);
+    console.log('=============');
 
     if (sumaScrollTopPlusClientHeight >= scrollHeight) {
 
         endOfPage += 1;
-        console.log(`Przeskrolowano do końca strony: ${endOfPage}`);
-        getData();
-    }
+        console.log(`Przeskrolowano do końca strony: ${endOfPage}x.`);
 
+        getData();
+
+    }
 }
 
 
-
-window.addEventListener('scroll', scrollToEndOfPage)
+window.addEventListener('scroll', scrollToEndOfPage);
